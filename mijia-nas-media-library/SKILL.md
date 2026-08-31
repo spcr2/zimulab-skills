@@ -24,7 +24,7 @@ agent_created: true
 
 所有脚本在 `scripts/` 下，自包含（含客户端启动、端口发现、认证），**直接运行即可**，无需手动开客户端。
 
-### 主执行器 `nas_rename.py`（最常用）
+### 主执行器 `nas_rename.py`（带前缀/结构化命名，最常用）
 
 ```bash
 python scripts/nas_rename.py --dry \
@@ -39,6 +39,23 @@ python scripts/nas_rename.py --dry \
 - `--dry` 只预览不执行；**正式执行前必须 dry 一次**
 - 字幕规则内置：中文 `{ep}.srt`→`.zh.srt`、英文 `{ep}-EN.srt`→`.en.srt`
 - 凭证自动从 LuCI `get_pool_info` 动态获取（不落盘）；如 API 不可用可 `--no-auto-creds` + 环境变量 `NAS_WEBDAV_USER/NAS_WEBDAV_PWD`
+
+### 平铺执行器 `nas_rename_flat.py`（纯数字命名/无前缀）
+
+网盘下载的剧集常是 `01.mp4 / 01.srt ... 45.mp4 / 45.srt` 平铺在单目录（无统一前缀、无季目录），用这个：
+
+```bash
+python scripts/nas_rename_flat.py --dry \
+  --old-dir "/pool0/data/百度网盘/NAS下载/全45集，粤语外挂" \
+  --new-dir "/pool0/data/百度网盘/NAS下载/The Demi-Gods and Semi-Devils 天龙八部 (1997)" \
+  --show "The Demi-Gods and Semi-Devils"
+```
+
+- 匹配规则：顶层 `NN.ext`（NN=1-2 位集数，mp4/srt/mkv/avi/ts），自动映射 `NN` → `S01E NN`
+- 流程：旧目录内建 `Season 1` → 文件改名移入 → 外层目录改名（`--new-dir`）
+- 未知目录（如弹幕/）与未匹配文件自动保留，随外层目录一起改名，零删除
+- 默认 `--dry` 预览，`--run` 才正式执行（2026-08-31 天龙八部 45 集实战验证 90/90 成功）
+- 目录名建议 `{Show} {中文名} ({Year})` 便于识别；文件名用英文官方名保证刮削命中
 
 ### 诊断探针 `nas_451_probe.py`
 
