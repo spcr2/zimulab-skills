@@ -75,6 +75,14 @@ python scripts/nas_batch_normalize.py --run    # 正式执行
 - 内置约定：目标目录名 `{Show} {中文名} ({Year})`，文件名 `{Show} SxxExx.ext`；同目录 MOVE 不落盘、失败即中止、先 dry
 - 2026-08-31 全库实战验证：7 个剧集单元 370 文件（叶卡捷琳娜38 + 人民的名义55 + 大宅门40 + 大明王朝46 + 贞观之治50 + 三国演义84 + 请回答57）一次执行 OK=382 FAIL=0，集数全部连续
 
+### 批量规范化执行器·第二轮 `nas_batch_round2_20260901.py`（下载完成后整理）
+
+第一轮跳过（下载中）的资源下完后，用同一套框架做第二轮。存档脚本 `nas_batch_round2_20260901.py`（用法同 round1：dry-run 预览 / `--run` 执行）。
+
+- 本轮新增解析器（flat 模式）：`ep_greed`（`EP01.mkv` / `EP40.END.mkv` 带 END 标记）、`ep_slamdunk`（`【001】标题.mkv`）、`ep_touch`（`...EP001.mkv`，需前置检查 `.downloading`）、`ep_kenshin_tv`（`浪客剑心 Rurouni Kenshin NN.rmvb`，仅纯数字=TV正片，追忆篇/星霜篇等特殊文件自动 SKIP 保留）、`ep_koseidon`（`恐龙特急克塞号NN：标题...mkv`）、`ep_handsome`（`绝代双骄.1999.EP01....mkv`）、`ep_duke`（`鹿鼎记.1998.DVDrip.2audio.EP01.mkv`）、`ep_dh`（`（资源V：xx）S01E01.mp4`，绝望的主妇季内文件）
+- 2026-09-01 实战验证：8 个剧集单元 533 文件（大时代40 + 灌篮高手101 + 浪客剑心95 + 恐龙特急克塞号35 + 绝代双骄40 + 鹿鼎记44 + 绝望的主妇178 + 蛇蝎美人78含字幕）一次执行 OK=548 FAIL=0
+- 关键判断：**即使目录看起来「下完了」，也要先探测有没有漏网 `.downloading` 标记**（棒球英豪 EP074 就是平铺文件带 `.downloading` 后缀，差点误处理）；杂质文件（多片源混杂）无法匹配解析器 → 自动 SKIP 保留原地，零删除
+
 ### 诊断探针 `nas_451_probe.py`
 
 PROPFIND/MOVE 遇到 451（nginx 拦截）时跑它，批量测试 Host/路径前缀/方法/UA/auth 各因素，定位拦截点。
